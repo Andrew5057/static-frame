@@ -6,11 +6,12 @@ from struct import calcsize, unpack
 from struct import error as StructError
 from zipfile import ZIP_STORED, BadZipFile
 
+import typing as tp
 import typing_extensions as tpx
 
 from static_frame.core.util import path_filter
 
-if tpx.TYPE_CHECKING:
+if tp.TYPE_CHECKING:
     from os import PathLike
     from types import TracebackType
 
@@ -118,7 +119,7 @@ TEndArchive = list[bytes | int]
 
 
 def _end_archive64_update(
-    fpin: tpx.IO[bytes],
+    fpin: tp.IO[bytes],
     offset: int,
     endrec: TEndArchive,
 ) -> TEndArchive:
@@ -178,7 +179,7 @@ def _end_archive64_update(
     return endrec
 
 
-def _extract_end_archive(file: tpx.IO[bytes]) -> TEndArchive:
+def _extract_end_archive(file: tp.IO[bytes]) -> TEndArchive:
     """Return data from the "End of Central Directory" record, or None.
 
     The data is a list of the nine items in the ZIP "End of central dir"
@@ -281,7 +282,7 @@ class ZipFilePartRO(io.BufferedIOBase):
 
     def __init__(
         self,
-        file: tpx.IO[bytes],
+        file: tp.IO[bytes],
         close: tpx.Callable[..., None],
         zinfo: ZipInfoRO,
     ) -> None:
@@ -289,13 +290,13 @@ class ZipFilePartRO(io.BufferedIOBase):
         Args:
             pos: the start position, just after the header
         """
-        self._file: tpx.IO[bytes] | None = file
+        self._file: tp.IO[bytes] | None = file
         self._pos = +zinfo.header_offset
         self._close = close  # callable
         self._file_size = zinfo.file_size  # main data size after header
         self._pos_end = -1  # self._pos + zinfo.file_size
 
-    def __enter__(self) -> tpx.Self:
+    def __enter__(self) -> tp.Self:
         return self
 
     def __exit__(
@@ -367,22 +368,22 @@ class ZipFilePartRO(io.BufferedIOBase):
 # -------------------------------------------------------------------------------
 
 
-@tpx.overload
+@tp.overload
 def yield_zinfos(
-    file: tpx.IO[bytes],
-    filename_only: tpx.Literal[True],
+    file: tp.IO[bytes],
+    filename_only: tp.Literal[True],
 ) -> tpx.Iterator[str]: ...
 
 
-@tpx.overload
+@tp.overload
 def yield_zinfos(
-    file: tpx.IO[bytes],
-    filename_only: tpx.Literal[False],
+    file: tp.IO[bytes],
+    filename_only: tp.Literal[False],
 ) -> tpx.Iterator[ZipInfoRO]: ...
 
 
 def yield_zinfos(
-    file: tpx.IO[bytes],
+    file: tp.IO[bytes],
     filename_only: bool,
 ) -> tpx.Iterator[ZipInfoRO | str]:
     """Read in the table of contents for the ZIP file."""
@@ -493,12 +494,12 @@ class ZipFileRO:
         '_file_ref_count',
     )
 
-    def __init__(self, file: PathLike[str] | str | tpx.IO[bytes]) -> None:
+    def __init__(self, file: PathLike[str] | str | tp.IO[bytes]) -> None:
         """Open the ZIP file with mode read 'r', write 'w', exclusive create 'x',
         or append 'a'."""
         file = path_filter(file)  # type: ignore
 
-        self._file: tpx.IO[bytes] | None
+        self._file: tp.IO[bytes] | None
 
         if isinstance(file, str):
             self._file_passed = False
@@ -522,7 +523,7 @@ class ZipFileRO:
             self._close(fp)
             raise
 
-    def __enter__(self) -> tpx.Self:
+    def __enter__(self) -> tp.Self:
         return self
 
     def __exit__(
@@ -572,7 +573,7 @@ class ZipFileRO:
         with self.open(name) as file:
             return file.read()
 
-    def open(self, name: str) -> tpx.IO[bytes]:
+    def open(self, name: str) -> tp.IO[bytes]:
         """Return file-like object for 'name'.
 
         name is a string for the file name within the ZIP file
@@ -637,7 +638,7 @@ class ZipFileRO:
         self._file = None
         self._close(file)
 
-    def _close(self, file: tpx.IO[bytes]) -> None:
+    def _close(self, file: tp.IO[bytes]) -> None:
         """Close function passed on to ZipFilePartRO instances from open()"""
         assert self._file_ref_count > 0
         self._file_ref_count -= 1
