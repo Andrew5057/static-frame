@@ -114,7 +114,7 @@ _CD64_OFFSET_START_CENTDIR = 9
 
 # -------------------------------------------------------------------------------
 
-TEndArchive = tpx.List[tpx.Union[bytes, int]]
+TEndArchive = list[bytes | int]
 
 
 def _end_archive64_update(
@@ -300,7 +300,7 @@ class ZipFilePartRO(io.BufferedIOBase):
 
     def __exit__(
         self,
-        type: tpx.Type[BaseException] | None,
+        type: type[BaseException] | None,
         value: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
@@ -527,7 +527,7 @@ class ZipFileRO:
 
     def __exit__(
         self,
-        type: tpx.Type[BaseException],
+        type: type[BaseException],
         value: BaseException,
         traceback: TracebackType,
     ) -> None:
@@ -545,12 +545,12 @@ class ZipFileRO:
         result.append('>')
         return ''.join(result)
 
-    def namelist(self) -> tpx.List[str]:
+    def namelist(self) -> list[str]:
         """Return a list of file names in the archive."""
         # return [data.filename for data in self.filelist]
         return list(self._name_to_info.keys())
 
-    def infolist(self) -> tpx.List[ZipInfoRO]:
+    def infolist(self) -> list[ZipInfoRO]:
         """Return a list of class ZipInfoRO instances for files in the
         archive."""
         return list(self._name_to_info.values())
