@@ -6,8 +6,9 @@ from struct import calcsize, unpack
 from struct import error as StructError
 from zipfile import ZIP_STORED, BadZipFile
 
+import collections.abc as cabc
 import typing as tp
-import typing_extensions as tpx
+import typing_extensions as tpx # cabc.Buffer only exists in Python 3.12+
 
 from static_frame.core.util import path_filter
 
@@ -283,7 +284,7 @@ class ZipFilePartRO(io.BufferedIOBase):
     def __init__(
         self,
         file: tp.IO[bytes],
-        close: tpx.Callable[..., None],
+        close: cabc.Callable[..., None],
         zinfo: ZipInfoRO,
     ) -> None:
         """
@@ -372,20 +373,20 @@ class ZipFilePartRO(io.BufferedIOBase):
 def yield_zinfos(
     file: tp.IO[bytes],
     filename_only: tp.Literal[True],
-) -> tpx.Iterator[str]: ...
+) -> cabc.Iterator[str]: ...
 
 
 @tp.overload
 def yield_zinfos(
     file: tp.IO[bytes],
     filename_only: tp.Literal[False],
-) -> tpx.Iterator[ZipInfoRO]: ...
+) -> cabc.Iterator[ZipInfoRO]: ...
 
 
 def yield_zinfos(
     file: tp.IO[bytes],
     filename_only: bool,
-) -> tpx.Iterator[ZipInfoRO | str]:
+) -> cabc.Iterator[ZipInfoRO | str]:
     """Read in the table of contents for the ZIP file."""
     try:
         endrec: TEndArchive = _extract_end_archive(file)
@@ -646,7 +647,7 @@ class ZipFileRO:
             file.close()
 
 
-def zip_namelist(fp: PathLike[str] | str) -> tpx.Iterator[str]:
+def zip_namelist(fp: PathLike[str] | str) -> cabc.Iterator[str]:
     """High-performance routine to list the contents of a zip. This will work with both compressed and uncompressed zips."""
     with open(fp, 'rb') as file:
         yield from yield_zinfos(file, True)
