@@ -5,7 +5,6 @@ from functools import partial
 from itertools import repeat
 
 import typing as tp
-import typing_extensions as tpx
 from arraykit import array_deepcopy
 
 from static_frame.core.bus import Bus
@@ -28,6 +27,8 @@ from static_frame.core.util import (
 )
 
 if tp.TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator, Sequence
+
     from static_frame.core.index_base import IndexBase
     from static_frame.core.yarn import Yarn
 
@@ -54,7 +55,7 @@ def get_extractor(
 def _bus_to_hierarchy_inner_hierarchies(
     bus: TBusAny | TYarnAny,
     axis: int,
-    extractor: tpx.Callable[[IndexBase], IndexBase],
+    extractor: Callable[[IndexBase], IndexBase],
     init_exception_cls: type[Exception],
 ) -> tuple[IndexHierarchy, IndexBase]:
     """
@@ -141,7 +142,7 @@ def bus_to_hierarchy(
 
 
 def buses_to_iloc_hierarchy(
-    buses: tpx.Iterable[TBusAny],
+    buses: Iterable[TBusAny],
     deepcopy_from_bus: bool,
     init_exception_cls: type[Exception],
 ) -> IndexHierarchy[TIndexIntDefault, TIndexAny]:
@@ -158,7 +159,7 @@ def buses_to_iloc_hierarchy(
             )
         tree[label] = extractor(bus._index)
 
-    ctor: tpx.Callable[..., IndexBase] = partial(Index, dtype=DTYPE_INT_DEFAULT)
+    ctor: Callable[..., IndexBase] = partial(Index, dtype=DTYPE_INT_DEFAULT)
     return IndexHierarchy.from_tree(
         tree,
         index_constructors=[ctor, IndexAutoConstructorFactory],  # type: ignore
@@ -166,7 +167,7 @@ def buses_to_iloc_hierarchy(
 
 
 def buses_to_loc_hierarchy(
-    buses: tpx.Sequence[TBusAny] | TNDArrayObject,
+    buses: Sequence[TBusAny] | TNDArrayObject,
     deepcopy_from_bus: bool,
     init_exception_cls: type[Exception],
 ) -> IndexHierarchy:
@@ -187,7 +188,7 @@ def buses_to_loc_hierarchy(
         )
 
     # if Bus names are not unique, doing this permits discovering if resultant labels are unique
-    def labels() -> tpx.Iterator[tuple[TName, TLabel]]:
+    def labels() -> Iterator[tuple[TName, TLabel]]:
         for bus in buses:
             yield from zip(repeat(bus.name), bus.index)
 
