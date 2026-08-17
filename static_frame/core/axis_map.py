@@ -43,7 +43,7 @@ def get_extractor(
         memo_active: enable usage of a common memoization dictionary accross all calls to extract from this extractor.
     """
     if deepcopy_from_bus:
-        memo: tpx.Optional[tpx.Dict[int, tpx.Any]] = None if not memo_active else {}
+        memo: dict[int, tpx.Any] | None = None if not memo_active else {}
         if is_array:
             return partial(array_deepcopy, memo=memo)  # pyright: ignore
         return partial(deepcopy, memo=memo)
@@ -51,17 +51,17 @@ def get_extractor(
 
 
 def _bus_to_hierarchy_inner_hierarchies(
-    bus: tpx.Union[TBusAny, TYarnAny],
+    bus: TBusAny | TYarnAny,
     axis: int,
     extractor: tpx.Callable[[IndexBase], IndexBase],
-    init_exception_cls: tpx.Type[Exception],
-) -> tpx.Tuple[IndexHierarchy, IndexBase]:
+    init_exception_cls: type[Exception],
+) -> tuple[IndexHierarchy, IndexBase]:
     """
     Specialized version of :func:`bus_to_hierarchy` for the case where Bus's frames contains only hierarchical indices on the axis of concatentation
     """
-    opposite: tpx.Optional[IndexBase] = None
+    opposite: IndexBase | None = None
 
-    def level_add(pair: tpx.Tuple[TLabel, TFrameAny]) -> IndexHierarchy:
+    def level_add(pair: tuple[TLabel, TFrameAny]) -> IndexHierarchy:
         nonlocal opposite
         label, frame = pair
 
@@ -91,11 +91,11 @@ def _bus_to_hierarchy_inner_hierarchies(
 
 
 def bus_to_hierarchy(
-    bus: tpx.Union[TBusAny, TYarnAny],
+    bus: TBusAny | TYarnAny,
     axis: int,
     deepcopy_from_bus: bool,
-    init_exception_cls: tpx.Type[Exception],
-) -> tpx.Tuple[IndexHierarchy, IndexBase | None]:
+    init_exception_cls: type[Exception],
+) -> tuple[IndexHierarchy, IndexBase | None]:
     """
     Given a :obj:`Bus` and an axis, derive a :obj:`IndexHierarchy`; also return and validate the :obj:`Index` of the opposite axis.
     """
@@ -111,7 +111,7 @@ def bus_to_hierarchy(
         )
 
     tree: TTreeNode = {}
-    opposite: tpx.Optional[IndexBase] = None
+    opposite: IndexBase | None = None
 
     # if Bus has an IH, label will be a tuple
     for label, f in bus.items():
@@ -142,7 +142,7 @@ def bus_to_hierarchy(
 def buses_to_iloc_hierarchy(
     buses: tpx.Iterable[TBusAny],
     deepcopy_from_bus: bool,
-    init_exception_cls: tpx.Type[Exception],
+    init_exception_cls: type[Exception],
 ) -> IndexHierarchy[TIndexIntDefault, TIndexAny]:
     """
     Given an iterable of named :obj:`Bus` derive a obj:`IndexHierarchy` with iloc labels on the outer depth, loc labels on the inner depth.
@@ -167,7 +167,7 @@ def buses_to_iloc_hierarchy(
 def buses_to_loc_hierarchy(
     buses: tpx.Sequence[TBusAny] | TNDArrayObject,
     deepcopy_from_bus: bool,
-    init_exception_cls: tpx.Type[Exception],
+    init_exception_cls: type[Exception],
 ) -> IndexHierarchy:
     """
     Given an iterable of named :obj:`Bus` derive a obj:`IndexHierarchy` with loc labels on the outer depth, loc labels on the inner depth.
