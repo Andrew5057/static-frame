@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import typing as tp
 import typing_extensions as tpx
 
 from static_frame.core.bus import Bus
@@ -64,7 +65,7 @@ TFrameOrSeries = Frame | Series
 TIteratorFrameItems = tpx.Iterator[tuple[TLabel, TFrameOrSeries]]
 TGeneratorFrameItems = tpx.Callable[..., TIteratorFrameItems]
 
-if tpx.TYPE_CHECKING:
+if tp.TYPE_CHECKING:
     from static_frame.core.display_config import DisplayConfig
     from static_frame.core.index import Index
     from static_frame.core.index_auto import (
@@ -85,18 +86,18 @@ if tpx.TYPE_CHECKING:
     )
     from static_frame.core.style_config import StyleConfig
 
-    TNDArrayAny = np.ndarray[tpx.Any, tpx.Any]
-    TDtypeAny = np.dtype[tpx.Any]
+    TNDArrayAny = np.ndarray[tp.Any, tp.Any]
+    TDtypeAny = np.dtype[tp.Any]
 
-TSeriesAny = Series[tpx.Any, tpx.Any]
-TFrameAny = Frame[tpx.Any, tpx.Any, tpx.Unpack[tuple[tpx.Any, ...]]]
-TBusAny = Bus[tpx.Any]
+TSeriesAny = Series[tp.Any, tp.Any]
+TFrameAny = Frame[tp.Any, tp.Any, tp.Unpack[tuple[tp.Any, ...]]]
+TBusAny = Bus[tp.Any]
 
 # -------------------------------------------------------------------------------
 # family of executor functions normalized in signature (taking a single tuple of args) for usage in processor pool calls
 
 
-def normalize_container(post: tpx.Any) -> TFrameOrSeries:
+def normalize_container(post: tp.Any) -> TFrameOrSeries:
     # post might be an element, promote to a Series to permit concatenation
     if post.__class__ is np.ndarray:
         if post.ndim == 1:
@@ -122,7 +123,7 @@ def call_func_items(
     return func(label, container)  # type: ignore
 
 
-def call_attr(bundle: tuple[TFrameOrSeries, str, tpx.Any, tpx.Any]) -> TFrameOrSeries:
+def call_attr(bundle: tuple[TFrameOrSeries, str, tp.Any, tp.Any]) -> TFrameOrSeries:
     container, attr, args, kwargs = bundle
     func = getattr(container, attr)
     return func(*args, **kwargs)  # type: ignore
@@ -173,7 +174,7 @@ class Batch(ContainerOperand, StoreClientMixin):
     @classmethod
     def _from_store(
         cls,
-        store: Store[tpx.Any],
+        store: Store[tp.Any],
         /,
         *,
         max_workers: int | None = None,
@@ -470,7 +471,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     # ---------------------------------------------------------------------------
     @property
-    def shapes(self) -> Series[Index[tpx.Any], np.object_]:
+    def shapes(self) -> Series[Index[tp.Any], np.object_]:
         """A :obj:`Series` describing the shape of each iterated :obj:`Frame`.
 
         Returns:
@@ -524,7 +525,7 @@ class Batch(ContainerOperand, StoreClientMixin):
     def _apply_pool(
         self,
         labels: list[TLabel],
-        arg_iter: tpx.Iterator[tuple[tpx.Any, ...]],
+        arg_iter: tpx.Iterator[tuple[tp.Any, ...]],
         caller: tpx.Callable[..., TFrameOrSeries],
     ) -> 'Batch':
         pool_executor = get_concurrent_executor(
@@ -544,7 +545,7 @@ class Batch(ContainerOperand, StoreClientMixin):
     def _apply_pool_except(
         self,
         labels: list[TLabel],
-        arg_iter: tpx.Iterator[tuple[tpx.Any, ...]],
+        arg_iter: tpx.Iterator[tuple[tp.Any, ...]],
         caller: tpx.Callable[..., TFrameOrSeries],
         exception: type[Exception],
     ) -> 'Batch':
@@ -576,9 +577,9 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def _apply_attr(
         self,
-        *args: tpx.Any,
+        *args: tp.Any,
         attr: str,
-        **kwargs: tpx.Any,
+        **kwargs: tp.Any,
     ) -> 'Batch':
         """
         Apply a method on a Frame given as an attr string.
@@ -593,7 +594,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, str, tpx.Any, tpx.Any]]:
+        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, str, tp.Any, tp.Any]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, attr, args, kwargs
@@ -741,7 +742,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         ""
         return self._apply_attr(attr='__getitem__', key=key)
 
-    def __setitem__(self, key: TLabel, value: tpx.Any) -> None:
+    def __setitem__(self, key: TLabel, value: tp.Any) -> None:
         raise immutable_type_error_factory(self.__class__, '', key, value)
 
     # ---------------------------------------------------------------------------
@@ -821,7 +822,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         self,
         *,
         operator: TUFunc,
-        other: tpx.Any,
+        other: tp.Any,
         fill_value: object = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
@@ -1010,7 +1011,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def isin(
         self,
-        other: tpx.Any,
+        other: tp.Any,
         /,
     ) -> 'Batch':
         """
@@ -1135,7 +1136,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         )
 
     def shift(
-        self, index: int = 0, columns: int = 0, fill_value: tpx.Any = np.nan
+        self, index: int = 0, columns: int = 0, fill_value: tp.Any = np.nan
     ) -> 'Batch':
         """
         Shift columns and/or rows by positive or negative integer counts, where columns and/or rows fall of the axis and introduce missing values, filled by `fill_value`.
@@ -1210,7 +1211,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def fillna(
         self,
-        value: tpx.Any,
+        value: tp.Any,
         /,
     ) -> 'Batch':
         """
@@ -1221,7 +1222,7 @@ class Batch(ContainerOperand, StoreClientMixin):
             attr='fillna',
         )
 
-    def fillna_leading(self, value: tpx.Any, /, *, axis: int = 0) -> 'Batch':
+    def fillna_leading(self, value: tp.Any, /, *, axis: int = 0) -> 'Batch':
         """
         Return a new :obj:`Batch` with contained :obj:`Frame` after filling leading (and only leading) null (NaN or None) with the provided ``value``.
 
@@ -1234,7 +1235,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def fillna_trailing(
         self,
-        value: tpx.Any,
+        value: tp.Any,
         /,
         *,
         axis: int = 0,
@@ -1293,7 +1294,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def fillfalsy(
         self,
-        value: tpx.Any,
+        value: tp.Any,
         /,
     ) -> 'Batch':
         """
@@ -1306,7 +1307,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def fillfalsy_leading(
         self,
-        value: tpx.Any,
+        value: tp.Any,
         /,
         *,
         axis: int = 0,
@@ -1326,7 +1327,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
     def fillfalsy_trailing(
         self,
-        value: tpx.Any,
+        value: tp.Any,
         /,
         *,
         axis: int = 0,
@@ -1475,7 +1476,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         skipna: bool = True,
         ascending: TBoolOrBools = True,
         start: int = 0,
-        fill_value: tpx.Any = np.nan,
+        fill_value: tp.Any = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
             attr='rank_ordinal',
@@ -1493,7 +1494,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         skipna: bool = True,
         ascending: TBoolOrBools = True,
         start: int = 0,
-        fill_value: tpx.Any = np.nan,
+        fill_value: tp.Any = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
             attr='rank_dense',
@@ -1511,7 +1512,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         skipna: bool = True,
         ascending: TBoolOrBools = True,
         start: int = 0,
-        fill_value: tpx.Any = np.nan,
+        fill_value: tp.Any = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
             attr='rank_min',
@@ -1529,7 +1530,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         skipna: bool = True,
         ascending: TBoolOrBools = True,
         start: int = 0,
-        fill_value: tpx.Any = np.nan,
+        fill_value: tp.Any = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
             attr='rank_max',
@@ -1547,7 +1548,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         skipna: bool = True,
         ascending: TBoolOrBools = True,
         start: int = 0,
-        fill_value: tpx.Any = np.nan,
+        fill_value: tp.Any = np.nan,
     ) -> 'Batch':
         return self._apply_attr(
             attr='rank_mean',
