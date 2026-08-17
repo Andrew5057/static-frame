@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import partial
 from itertools import repeat
 
+import typing as tp
 import typing_extensions as tpx
 from arraykit import array_deepcopy
 
@@ -26,11 +27,11 @@ from static_frame.core.util import (
     TNDArrayObject,
 )
 
-if tpx.TYPE_CHECKING:
+if tp.TYPE_CHECKING:
     from static_frame.core.index_base import IndexBase
     from static_frame.core.yarn import Yarn
 
-    TYarnAny = Yarn[tpx.Any]
+    TYarnAny = Yarn[tp.Any]
 
 
 def get_extractor(
@@ -43,7 +44,7 @@ def get_extractor(
         memo_active: enable usage of a common memoization dictionary accross all calls to extract from this extractor.
     """
     if deepcopy_from_bus:
-        memo: dict[int, tpx.Any] | None = None if not memo_active else {}
+        memo: dict[int, tp.Any] | None = None if not memo_active else {}
         if is_array:
             return partial(array_deepcopy, memo=memo)  # pyright: ignore
         return partial(deepcopy, memo=memo)
@@ -102,7 +103,7 @@ def bus_to_hierarchy(
     # NOTE: need to extract just axis labels, not the full Frame; need new Store/Bus loaders just for label data
     extractor = get_extractor(deepcopy_from_bus, is_array=False, memo_active=False)
 
-    first = tpx.cast(TFrameAny, bus.iloc[0])
+    first = tp.cast(TFrameAny, bus.iloc[0])
     if (axis == 0 and isinstance(first.index, IndexHierarchy)) or (
         axis == 1 and isinstance(first.columns, IndexHierarchy)
     ):
