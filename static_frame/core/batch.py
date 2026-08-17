@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import typing as tp
-import typing_extensions as tpx
 from collections.abc import Callable, Iterable, Iterator
 
 from static_frame.core.bus import Bus
