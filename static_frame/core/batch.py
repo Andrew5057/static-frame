@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import typing as tp
 import typing_extensions as tpx
+from collections.abc import Callable, Iterable, Iterator
 
 from static_frame.core.bus import Bus
 from static_frame.core.container import ContainerOperand
@@ -62,8 +63,8 @@ from static_frame.core.util import (
 )
 
 TFrameOrSeries = Frame | Series
-TIteratorFrameItems = tpx.Iterator[tuple[TLabel, TFrameOrSeries]]
-TGeneratorFrameItems = tpx.Callable[..., TIteratorFrameItems]
+TIteratorFrameItems = Iterator[tuple[TLabel, TFrameOrSeries]]
+TGeneratorFrameItems = Callable[..., TIteratorFrameItems]
 
 if tp.TYPE_CHECKING:
     from static_frame.core.display_config import DisplayConfig
@@ -149,7 +150,7 @@ class Batch(ContainerOperand, StoreClientMixin):
     @classmethod
     def from_frames(
         cls,
-        frames: tpx.Iterable[TFrameAny],
+        frames: Iterable[TFrameAny],
         /,
         *,
         name: TName = None,
@@ -525,8 +526,8 @@ class Batch(ContainerOperand, StoreClientMixin):
     def _apply_pool(
         self,
         labels: list[TLabel],
-        arg_iter: tpx.Iterator[tuple[tp.Any, ...]],
-        caller: tpx.Callable[..., TFrameOrSeries],
+        arg_iter: Iterator[tuple[tp.Any, ...]],
+        caller: Callable[..., TFrameOrSeries],
     ) -> 'Batch':
         pool_executor = get_concurrent_executor(
             use_threads=self._use_threads,
@@ -545,8 +546,8 @@ class Batch(ContainerOperand, StoreClientMixin):
     def _apply_pool_except(
         self,
         labels: list[TLabel],
-        arg_iter: tpx.Iterator[tuple[tp.Any, ...]],
-        caller: tpx.Callable[..., TFrameOrSeries],
+        arg_iter: Iterator[tuple[tp.Any, ...]],
+        caller: Callable[..., TFrameOrSeries],
         exception: type[Exception],
     ) -> 'Batch':
         if self._chunksize != 1:
@@ -594,7 +595,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, str, tp.Any, tp.Any]]:
+        def arg_gen() -> Iterator[tuple[TFrameOrSeries, str, tp.Any, tp.Any]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, attr, args, kwargs
@@ -619,7 +620,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, TCallableAny]]:
+        def arg_gen() -> Iterator[tuple[TFrameOrSeries, TCallableAny]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, func
@@ -648,7 +649,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, TCallableAny]]:
+        def arg_gen() -> Iterator[tuple[TFrameOrSeries, TCallableAny]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, func
@@ -678,7 +679,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, TCallableAny, TLabel]]:
+        def arg_gen() -> Iterator[tuple[TFrameOrSeries, TCallableAny, TLabel]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, func, label
@@ -708,7 +709,7 @@ class Batch(ContainerOperand, StoreClientMixin):
 
         labels = []
 
-        def arg_gen() -> tpx.Iterator[tuple[TFrameOrSeries, TCallableAny, TLabel]]:
+        def arg_gen() -> Iterator[tuple[TFrameOrSeries, TCallableAny, TLabel]]:
             for label, frame in self._iter_items():
                 labels.append(label)
                 yield frame, func, label
@@ -784,21 +785,21 @@ class Batch(ContainerOperand, StoreClientMixin):
     # dictionary-like interface
     # these methods operate on the Batch itself, not the contained Frames
 
-    def keys(self) -> tpx.Iterator[TLabel]:
+    def keys(self) -> Iterator[TLabel]:
         """
         Iterator of :obj:`Frame` labels.
         """
         for k, _ in self._iter_items():
             yield k
 
-    def __iter__(self) -> tpx.Iterator[TLabel]:
+    def __iter__(self) -> Iterator[TLabel]:
         """
         Iterator of :obj:`Frame` labels, same as :obj:`Batch.keys`.
         """
         yield from self.keys()
 
     @property
-    def values(self) -> tpx.Iterator[TFrameOrSeries]:  # type: ignore # NOTE: this violates the supertype
+    def values(self) -> Iterator[TFrameOrSeries]:  # type: ignore # NOTE: this violates the supertype
         """
         Return an iterator of values (:obj:`Frame` or :obj:`Series`) stored in this :obj:`Batch`.
         """
@@ -1166,7 +1167,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         self,
         *,
         axis: int = 0,
-        condition: tpx.Callable[[TNDArrayAny], bool] = np.all,
+        condition: Callable[[TNDArrayAny], bool] = np.all,
     ) -> 'Batch':
         """
         Return a :obj:`Batch` with contained :obj:`Frame` after removing rows (axis 0) or columns (axis 1) where any or all values are NA (NaN or None). The condition is determined by a NumPy ufunc that process the Boolean array returned by ``isna()``; the default is ``np.all``.
@@ -1195,7 +1196,7 @@ class Batch(ContainerOperand, StoreClientMixin):
         self,
         *,
         axis: int = 0,
-        condition: tpx.Callable[[TNDArrayAny], bool] = np.all,
+        condition: Callable[[TNDArrayAny], bool] = np.all,
     ) -> 'Batch':
         """
         Return a :obj:`Batch` with contained :obj:`Frame` after removing rows (axis 0) or columns (axis 1) where any or all values are NA (NaN or None). The condition is determined by a NumPy ufunc that process the Boolean array returned by ``isna()``; the default is ``np.all``.
@@ -1400,7 +1401,7 @@ class Batch(ContainerOperand, StoreClientMixin):
     def unset_index(
         self,
         *,
-        names: tpx.Iterable[TLabel] = (),
+        names: Iterable[TLabel] = (),
         consolidate_blocks: bool = False,
         columns_constructors: TIndexCtorSpecifiers = None,
     ) -> 'Batch':
