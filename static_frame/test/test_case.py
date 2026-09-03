@@ -42,6 +42,11 @@ skip_win = pytest.mark.skipif(
     sys.platform.startswith('win'), reason='Windows default dtypes'
 )
 
+skip_win_pye314 = pytest.mark.skipif(
+    sys.platform.startswith('win') and sys.version_info[:2] == (3, 14),
+    reason='Windows with Python 3.14 fails on Tkinter clipboard usage',
+)
+
 skip_linux_no_display = pytest.mark.skipif(
     sys.platform == 'linux' and 'DISPLAY' not in os.environ,
     reason='No display available',
