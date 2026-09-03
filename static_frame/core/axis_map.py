@@ -27,7 +27,7 @@ from static_frame.core.util import (
 )
 
 if tp.TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Sequence
+    import collections.abc as cabc
 
     from static_frame.core.index_base import IndexBase
     from static_frame.core.yarn import Yarn
@@ -55,7 +55,7 @@ def get_extractor(
 def _bus_to_hierarchy_inner_hierarchies(
     bus: TBusAny | TYarnAny,
     axis: int,
-    extractor: Callable[[IndexBase], IndexBase],
+    extractor: cabc.Callable[[IndexBase], IndexBase],
     init_exception_cls: type[Exception],
 ) -> tuple[IndexHierarchy, IndexBase]:
     """
@@ -142,7 +142,7 @@ def bus_to_hierarchy(
 
 
 def buses_to_iloc_hierarchy(
-    buses: Iterable[TBusAny],
+    buses: cabc.Iterable[TBusAny],
     deepcopy_from_bus: bool,
     init_exception_cls: type[Exception],
 ) -> IndexHierarchy[TIndexIntDefault, TIndexAny]:
@@ -159,7 +159,7 @@ def buses_to_iloc_hierarchy(
             )
         tree[label] = extractor(bus._index)
 
-    ctor: Callable[..., IndexBase] = partial(Index, dtype=DTYPE_INT_DEFAULT)
+    ctor: cabc.Callable[..., IndexBase] = partial(Index, dtype=DTYPE_INT_DEFAULT)
     return IndexHierarchy.from_tree(
         tree,
         index_constructors=[ctor, IndexAutoConstructorFactory],  # type: ignore
@@ -167,7 +167,7 @@ def buses_to_iloc_hierarchy(
 
 
 def buses_to_loc_hierarchy(
-    buses: Sequence[TBusAny] | TNDArrayObject,
+    buses: cabc.Sequence[TBusAny] | TNDArrayObject,
     deepcopy_from_bus: bool,
     init_exception_cls: type[Exception],
 ) -> IndexHierarchy:
@@ -188,7 +188,7 @@ def buses_to_loc_hierarchy(
         )
 
     # if Bus names are not unique, doing this permits discovering if resultant labels are unique
-    def labels() -> Iterator[tuple[TName, TLabel]]:
+    def labels() -> cabc.Iterator[tuple[TName, TLabel]]:
         for bus in buses:
             yield from zip(repeat(bus.name), bus.index)
 
