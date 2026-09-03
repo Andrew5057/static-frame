@@ -1,20 +1,19 @@
 from __future__ import annotations
 
 import io
-import os
+import typing as tp
 from struct import calcsize, unpack
 from struct import error as StructError
 from zipfile import ZIP_STORED, BadZipFile
 
-import collections.abc as cabc
-import typing as tp
-import typing_extensions as tpx # cabc.Buffer only exists in Python 3.12+
-
 from static_frame.core.util import path_filter
 
 if tp.TYPE_CHECKING:
+    import collections.abc as cabc
     from os import PathLike
     from types import TracebackType
+
+    import typing_extensions as tpx  # cabc.Buffer only exists in Python 3.12+
 
 
 # Optimized reader of uncompressed ZIP files. Based largely on CPython, Lib/zipfile/__init__.py. This ZIP reader removes CRC checking as well as file locks around in the object returned from open(). This is deemed acceptable as this is only used with NPZ files, which are not compressed, are read in a single thread, and are often bundled in (an outer) ZIP archives, such as those produced by Bus.to_zip_npz(). When unpacking such ZIP archives of NPZ, compression is still supported and CRC checking is performed. If the standard ZipFile reader is used on such a ZIP NPZ, CRC checking would actually be done twice, as the full bytes for the file are read into a BytesIO object and use to create new ZipFile instance for loading as an NPZ.
