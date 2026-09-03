@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+import collections.abc as cabc
 import io
 import json
 import mmap
 import os
 import shutil
 import struct
+import typing as tp
 from ast import literal_eval
 from collections import defaultdict
 from contextlib import contextmanager
 from io import UnsupportedOperation
 from zipfile import ZIP_STORED, ZipFile
 
-import collections.abc as cabc
 import numpy as np
-import typing as tp
 from arraykit import write_array_to_file
 
 from static_frame.core.archive_zip import ZipFilePartRO, ZipFileRO
