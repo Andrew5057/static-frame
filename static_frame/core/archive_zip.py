@@ -385,7 +385,7 @@ def yield_zinfos(
 def yield_zinfos(
     file: tp.IO[bytes],
     filename_only: bool,
-) -> cabc.Iterator[ZipInfoRO | str]:
+) -> cabc.Iterator[ZipInfoRO] | cabc.Iterator[str]:
     """Read in the table of contents for the ZIP file."""
     try:
         endrec: TEndArchive = _extract_end_archive(file)
