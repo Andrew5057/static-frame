@@ -1,13 +1,19 @@
 import numpy as np
 
 from static_frame import Frame
-from static_frame.test.test_case import TestCase, skip_linux_no_display, skip_mac_pyle310
+from static_frame.test.test_case import (
+    TestCase,
+    skip_linux_no_display,
+    skip_mac_pyle310,
+    skip_win_pye314,
+)
 
 
 class TestUnit(TestCase):
     # NOTE: this test will end up clearing the user's clipboard
 
     @skip_mac_pyle310
+    @skip_win_pye314
     @skip_linux_no_display
     def test_frame_to_clipboard_a(self) -> None:
         records = (
