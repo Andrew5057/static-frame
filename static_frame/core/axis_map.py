@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import typing as tp
 from copy import deepcopy
 from functools import partial
 from itertools import repeat
 
-import typing as tp
 from arraykit import array_deepcopy
 
 from static_frame.core.bus import Bus
