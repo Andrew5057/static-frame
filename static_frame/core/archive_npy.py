@@ -689,9 +689,9 @@ class ArchiveIndexConverter:
         key_template_values: str,
         key_types: str,  # which key to fetch IH component types
         depth: int,
-        cls_index: 'type[IndexBase]',
+        cls_index: type[IndexBase],
         name: TName,
-    ) -> 'IndexBase | None':
+    ) -> IndexBase | None:
         """Build index or columns."""
         from static_frame.core.type_blocks import TypeBlocks
 
